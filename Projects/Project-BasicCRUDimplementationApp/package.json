@@ -1,0 +1,24 @@
+{
+  "name": "mongodb-crudwithejs_serverside",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+  "dev": "node app.js",
+  "dev:css": "tailwindcss -i ./src/input.css -o ./public/stylesheets/tailwind.css --watch"
+}
+,
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "mongoose": "^9.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.18",
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18"
+  }
+}

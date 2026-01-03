@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            grid-template-rows: repeat(8, minmax(0, 1fr));
+            width: 400px;
+            height: 400px;
+            transform: rotate(0deg);
+        }
+
+        .piece.white {
+            color: white;
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 1));
+        }
+
+        .piece.black {
+            color: black;
+        }
+
+        .flipped {
+            transform: rotate(180deg);
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .square.light {
+            background-color: #f0d9b5;
+        }
+
+        .square.dark {
+            background-color: #b58863;
+        }
+
+        .piece {
+            font-size: 36px;
+            cursor: pointer;
+        }
+
+        .piece.draggable {
+            cursor: grab;
+        }
+
+        .dragging {
+            opacity: 0.5;
+        }
+
+        /* Rotate pieces for black player */
+        .flipped .piece {
+            transform: rotate(180deg);
+        }
+        .square.check {
+            background-color: #ff6b6b !important;
+        }
+
+        .square.checkmate {
+            background-color: #ff0000 !important;
+        }
+
+        .square.possible-move {
+            position: relative;
+        }
+
+        .square.possible-move::after {
+            content: '';
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background-color: rgba(59, 130, 246, 0.6);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .square.possible-move.has-piece::after {
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            border: 3px solid rgba(59, 130, 246, 0.7);
+            border-radius: 0;
+        }
+
+        .board-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .board-row.black-view {
+            flex-direction: row-reverse;
+        }
+
+        #gameOverModal.show {
+            display: flex;
+        }
+
+        .captured-rail {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+            height: 420px; /* shorter sidebars */
+            background-color: #8b7355;
+            border: 1px solid #6b5744;
+            border-radius: 6px;
+            padding: 10px 6px;
+            min-width: 50px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+
+        .captured-rail-enemy {
+            justify-content: flex-start;
+        }
+
+        .captured-rail-own {
+            justify-content: flex-end;
+        }
+
+        .captured-piece {
+            font-size: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #drawBtn {
+            transition: all 0.3s ease;
+        }
+
+        #drawBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        #drawBtn.offering {
+            background-color: #fbbf24;
+            color: #78350f;
+            animation: pulse 1.5s infinite;
+        }
+
+        #resignBtn {
+            transition: all 0.3s ease;
+        }
+
+        #resignBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        #resignBtn.resigning {
+            background-color: #ef4444;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fbbf24;
+            color: #78350f;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .notification-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .notification-btn {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .notification-btn-accept {
+            background: #10b981;
+            color: white;
+        }
+
+        .notification-btn-accept:hover {
+            background: #059669;
+        }
+
+        .notification-btn-decline {
+            background: #ef4444;
+            color: white;
+        }
+
+        .notification-btn-decline:hover {
+            background: #dc2626;
+        }
+
+
+        body {
+            background-image:
+                linear-gradient(135deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.65)),
+                url("/images/bg.avif");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.25), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.25), transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.2), transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="w-full min-h-screen flex items-center justify-center">
+        <div class="flex flex-col items-center gap-4">
+            <div id="boardRow" class="board-row">
+                <div id="capturedLeft" class="captured-rail captured-rail-enemy"></div>
+
+                <div class="chessboard w-[500px] h-[500px] bg-red-800"></div>
+
+                <div id="capturedRight" class="captured-rail captured-rail-own"></div>
+            </div>
+            <div class="flex gap-8">
+                <button id="drawBtn" class="px-3 py-1.5 rounded-md bg-slate-200 text-slate-900 font-semibold hover:bg-white transition text-sm">Offer Draw</button>
+                <button id="resignBtn" class="px-3 py-1.5 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition text-sm">Resign</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="drawNotification" class="notification hidden">
+        <div class="notification-content">
+            <span>Opponent offers a draw</span>
+        </div>
+        <div class="notification-buttons">
+            <button class="notification-btn notification-btn-accept" onclick="acceptDraw()">Accept</button>
+            <button class="notification-btn notification-btn-decline" onclick="declineDraw()">Decline</button>
+        </div>
+    </div>
+
+    <div id="gameOverModal"class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+        <div class="bg-zinc-900 text-white p-6 rounded-xl text-center w-80">
+            <h2 id="winnerText" class="text-2xl font-bold mb-4"></h2>
+
+            <button id="restartBtn"
+            class="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-md font-semibold">
+            Next Match
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" integrity="sha512-xRllwz2gdZciIB+AkEbeq+gVhX8VB8XsfqeFbUh+SzHlN96dEduwtTuVuc2u9EROlmW9+yhRlxjif66ORpsgVA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="/javascripts/chessgame.js"></script>
+
+</body>
+</html>

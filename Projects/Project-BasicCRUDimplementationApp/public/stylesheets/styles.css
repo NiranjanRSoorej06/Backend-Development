@@ -1,0 +1,178 @@
+*{
+    margin:0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html,body{
+    width: 100vw;
+    height: 100%;
+}
+
+/* Prevent horizontal page scrolling and hide native vertical scrollbar visually */
+html, body {
+    overflow-x: hidden;
+}
+
+/* allow vertical scroll but hide its track/thumb in most browsers */
+body{
+    overflow-y: auto;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar{display:none} /* Chrome, Safari, Opera */
+
+:root{
+    --bg:#071122;
+    --panel:#0f1724;
+    --muted:#9ca3af;
+    --accent:#1e90ff; /* blue accent for user icon and buttons */
+    --input-bg:rgba(255,255,255,0.02);
+    --input-border:rgba(255,255,255,0.06);
+    --text:#e6eef8;
+}
+
+html{background-color:var(--bg)}
+body{
+    background-color: var(--bg); /* uniform dark-blue background */
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    min-height:100vh;
+    padding:2rem;
+    background-attachment: fixed;
+}
+
+.page-center{
+    max-width:900px;
+    margin:0 auto;
+    background: transparent;
+}
+
+/* Truncate long text inside tiles to avoid horizontal overflow */
+.user h3,
+.user .muted{
+    display:block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Ensure card doesn't produce horizontal scroll from inner elements */
+.user{overflow:hidden}
+
+.card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+    border: 1px solid rgba(255,255,255,0.04);
+    padding:1.25rem;
+    border-radius:12px;
+    box-shadow: 0 8px 24px rgba(2,6,23,0.6);
+}
+
+.form-row{
+    display:flex;
+    gap:0.75rem;
+    align-items:center;
+    margin-bottom:0.75rem;
+}
+
+.input{
+    width:100%;
+    padding:0.6rem 0.9rem;
+    background:var(--input-bg);
+    border:1px solid var(--input-border);
+    color:var(--text);
+    border-radius:8px;
+    outline:none;
+    transition: box-shadow .15s ease, border-color .15s ease, transform .06s ease;
+}
+
+.input:focus{
+    box-shadow: 0 0 0 6px rgba(30,144,255,0.08);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.button{
+    background:var(--accent);
+    color:#fff;
+    padding:0.6rem 0.9rem;
+    border-radius:8px;
+    border: none;
+    cursor:pointer;
+    font-weight:600;
+    box-shadow: 0 8px 20px rgba(30,144,255,0.18);
+}
+.uButton{
+    background:#ca8a04;
+    color:#fff;
+    padding:0.6rem 0.9rem;
+    border-radius:8px;
+    border: none;
+    cursor:pointer;
+    font-weight:600;
+    box-shadow: 0 8px 20px rgba(30,144,255,0.18);
+}
+.uButton:hover{
+    background: #a16207; /* slightly darker on hover */
+}
+
+.muted{
+    color:var(--muted);
+}
+
+.user-icon{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    background:var(--accent);
+    display:inline-grid;
+    place-items:center;
+    color:white;
+    font-weight:700;
+    font-size:16px;
+    flex:0 0 auto;
+}
+
+.user-icon svg{width:60%;height:60%;display:block;fill:#fff}
+
+.nav a{color:var(--accent);text-decoration:none}
+
+/* small utility spacing */
+.mt-4{margin-top:1rem}
+.mb-3{margin-bottom:0.75rem}
+
+/* Users grid and card helpers */
+.users{
+    display:grid;
+    /* fixed tile width: 18rem each, wrap to new rows as needed */
+    grid-template-columns: repeat(auto-fill, 18rem);
+    gap:1rem;
+    align-items:start;
+    justify-content:center;
+    margin-top:0.5rem;
+}
+
+.user{
+    width:18rem;
+}
+
+.user .user-image{
+    height:16rem; /* increased to make tiles noticeably taller */
+    border-radius:8px;
+    overflow:hidden;
+    background:var(--panel);
+}
+
+.user .user-image img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+/* Ensure page-center stretches visually when many tiles exist */
+.page-center{
+    min-height:100vh; /* ensure page area fills viewport */
+    padding-bottom:3rem
+}
